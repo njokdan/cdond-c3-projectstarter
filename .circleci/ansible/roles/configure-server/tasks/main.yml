@@ -3,7 +3,7 @@
   become: true
   shell: |
     curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-- name: "Install nade.js 13"
+- name: "Install node.js 13"
   become: true
   apt: 
     name: ["nodejs"]
