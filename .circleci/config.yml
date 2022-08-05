@@ -217,7 +217,7 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             # Your code here
-            aws ec2 describe-instances --filters "Name=tag:Name,Values=*backend-${CIRCLE_WORKFLOW_ID:0:7}*" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
+            aws ec2 describe-instances --filter "Name=tag:Name,Values=*backend-${CIRCLE_WORKFLOW_ID:0:7}*" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
       # - run: 
       #     name: Save Backend url
@@ -271,59 +271,35 @@ jobs:
   #           # exit 1
   #     # Here's where you will add some code to rollback on failure      
   #     - destroy-environment
+
   configure-infrastructure:
-
     docker:
-
       # Docker image here that supports Ansible
-
       - image: cimg/base:stable #python:3.7-alpine3.16
-
     steps:
-
       # Checkout code from git
 
       # Add ssh keys with fingerprint
 
       # attach workspace
-
-     
-
       - checkout
-
       - add_ssh_keys:
-
           fingerprints: ["b7:bf:50:bd:e4:98:4d:30:c3:73:af:dd:1d:2c:c0:e9"]
-
       - attach_workspace:
-
           at: ~/
-
       - install_ansible
-
       # - run:
-
       #     name: Install dependencies
-
       #     command: |
-
       #       # apk add --update ansible
-
-      #       # apk add --no-cache aws-cli
-        
+      #       # apk add --no-cache aws-cli       
       - run:
-
           name: Configure server
-
           command: |
-
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml -vvv
-
       # Here's where you will add some code to rollback on failure
-
       - destroy-environment:
-
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   run-migrations:
