@@ -321,31 +321,62 @@ jobs:
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
-      - image: circleci/node:13.8.0
+      - image: circleci/node
     steps:
-      # Checkout code from git
       - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Install AWS CLI
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
       - run:
           name: Run migrations
           command: |
-            # Your code here
-            cd backend 
+            cd backend
             npm install
             npm run migrations > migrations_dump.txt
-            # exit 1
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to KVDB
           command: |
-            # Your code here
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
               curl --insecure https://kvdb.io/U5PTsaAeLTZsi6CSirgGDV/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
-     # Here's where you will add some code to rollback on failure      
-      - destroy-environment
-      - revert-migrations
-            # exit 1
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
+  # run-migrations:
+  #   docker:
+  #     # Docker image here that supports NodeJS
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     # Checkout code from git
+  #     - checkout
+  #     - run:
+  #         name: Run migrations
+  #         command: |
+  #           # Your code here
+  #           cd backend 
+  #           npm install
+  #           npm run migrations > migrations_dump.txt
+  #           # exit 1
+  #     - run:
+  #         name: Send migration results to memstash
+  #         command: |
+  #           # Your code here
+  #           if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+  #           then
+  #             curl --insecure https://kvdb.io/U5PTsaAeLTZsi6CSirgGDV/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
+  #           fi
+  #    # Here's where you will add some code to rollback on failure      
+  #     - destroy-environment
+  #     - revert-migrations
+  #           # exit 1
 
 #   deploy-frontend:
 #     docker:
