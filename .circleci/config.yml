@@ -47,15 +47,23 @@ commands:
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             # SUCCESS = 1
-            SUCCESS=$(curl --insecure "https://kvdb.io/S5KpGb93TtEPpk9jgKpvUb/migration_<<parameters.workflow_id>>")
-            if(( $SUCCESS==1 )); 
+            # SUCCESS=$(curl --insecure "https://kvdb.io/S5KpGb93TtEPpk9jgKpvUb/migration_<<parameters.workflow_id>>")
+            SUCCESS=$(curl -k https://kvdb.io/S5KpGb93TtEPpk9jgKpvUb/migration_<<parameters.workflow_id>>)
+            echo "$SUCCESS"
+            if [[ "${SUCCESS}" == 1 ]];  
             then
               cd ~/project/backend
               npm install
-            #  Add revert code here. You can find this in the Getting Started section.
               npm run migrations:revert
-              # exit 1
             fi
+            # if(( $SUCCESS==1 )); 
+            # then
+            #   cd ~/project/backend
+            #   npm install
+            # #  Add revert code here. You can find this in the Getting Started section.
+            #   npm run migrations:revert
+            #   # exit 1
+            # fi
             
 jobs:
   build-frontend:
@@ -217,8 +225,16 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             # Your code here
-            aws ec2 describe-instances --filter "Name=tag:Name,Values=*backend-${CIRCLE_WORKFLOW_ID:0:7}*" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
-            cat .circleci/ansible/inventory.txt
+            cd .circleci/ansible
+            cat inventory.txt
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text --filter Name=tag:Name,Values=backend-${CIRCLWORKFLOW_ID:0:7} >> inventory
+            cat inventory.txt
+
+            # # Your code here
+            # aws ec2 describe-instances --filter "Name=tag:Name,Values=*backend-${CIRCLE_WORKFLOW_ID:0:7}*" --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
+            # cat .circleci/ansible/inventory.txt
       # - run: 
       #     name: Save Backend url
       #     command: |
@@ -233,7 +249,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure      
-      - destroy-environment
+      # - destroy-environment
 
   # configure-infrastructure:
   #   docker:
@@ -284,7 +300,8 @@ jobs:
       # attach workspace
       - checkout
       - add_ssh_keys:
-          fingerprints: [b7:bf:50:bd:e4:98:4d:30:c3:73:af:dd:1d:2c:c0:e9]
+          fingerprints: 
+            - "19:25:77:e7:ec:68:8d:7f:df:41:61:e4:e2:0b:07:a7"
       - attach_workspace:
           at: ~/
       - install_ansible
