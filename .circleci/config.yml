@@ -394,8 +394,8 @@ jobs:
           command: |
             # your code here
             sudo apt-get update \
-            && sudo apt-get install -y tar \
-            && sudo apt-get install -y awscli
+            && sudo apt-get install -y tar gzip \
+            && sudo apt-get install -y awscli            
       - run:
           name: Get backend url
           command: |
@@ -420,9 +420,9 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure   
       # - destroy-environment:
-      #     workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       # - revert-migrations:
-      #     workflow-id: "${CIRCLE_WORKFLOW_ID:0:7}"   
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
                     
 #   deploy-backend:
 #     docker:
