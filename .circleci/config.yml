@@ -447,23 +447,50 @@ jobs:
       - revert-migrations
           # workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
                     
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
-
+  deploy-backend:
+    docker:
+      # Docker image here that supports Ansible
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - "19:25:77:e7:ec:68:8d:7f:df:41:61:e4:e2:0b:07:a7"
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+            # your code here
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       # your code here
+      - install_nodejs
+      - install_awscli
+      - install_ansible
+      - run:
+          name: Deploy backend
+          command: |
+            # your code here
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
+          # workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations
+      
 #   smoke-test:
 #     docker:
 #       # Lightweight Docker image 
@@ -546,8 +573,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
