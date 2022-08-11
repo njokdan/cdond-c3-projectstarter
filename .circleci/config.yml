@@ -1,6 +1,25 @@
 version: 2.1
 
 commands:
+  install_nodejs:
+    description: Install Node.Js 13
+    steps:
+      - run:
+          name: Install Node.Js 13
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash - 
+            sudo apt install -y nodejs
+
+  install_awscli:
+    description: Install AWS cLi
+    steps:
+      - run:
+          name: Install AWS cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
   install_ansible:
     description: Install Ansible
     steps:
@@ -381,21 +400,23 @@ jobs:
   deploy-frontend:
     docker:
       # Docker image here that supports AWS CLI
-      - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       # Checkout code from git
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
+      - add_ssh_keys:
+          fingerprints:
+            - "19:25:77:e7:ec:68:8d:7f:df:41:61:e4:e2:0b:07:a7"
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install dependencies
-          command: |
+      # - run:
+      #     name: Install dependencies
+      #     command: |
             # your code here
-            sudo apt-get update \
-            && sudo apt-get install -y tar gzip \
-            && sudo apt-get install -y awscli            
+      - install_nodejs
+      - install_awscli
+      - install_ansible
+                      
       - run:
           name: Get backend url
           command: |
@@ -406,7 +427,7 @@ jobs:
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            echo "API_URL=${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
       - run:
@@ -414,15 +435,17 @@ jobs:
           command: |
             # your code here
             cd frontend
+            sudo npm install -g npm@latest
+            rm -rf node_modules
             npm install
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure   
-      # - destroy-environment:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      # - revert-migrations:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
+      - destroy-environment
+          # workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations
+          # workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
                     
 #   deploy-backend:
 #     docker:
