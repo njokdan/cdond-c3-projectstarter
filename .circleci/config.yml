@@ -518,11 +518,11 @@ jobs:
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output text)
             # Fetch and prepare the BACKEND_PUBLIC_IP env var
-            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
+            export API_URL="http://${BACKEND_PUBLIC_IP}:3030"
             echo ${BACKEND_PUBLIC_IP}
             echo backend-${CIRCLE_WORKFLOW_ID:0:7}
             echo ${API_URL}
-            if curl ${API_URL}/api/status | grep "ok"
+            if curl "${API_URL}/api/status" | grep "ok"
             then
                 exit 0
             else
@@ -532,7 +532,7 @@ jobs:
           name: Frontend smoke test.
           command: |
             # your code here
-            FRONTEND_WEBSITE=http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com            
+            FRONTEND_WEBSITE="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-${AWS_DEFAULT_REGION}.amazonaws.com"           
             echo ${FRONTEND_WEBSITE} 
             if curl -s ${FRONTEND_WEBSITE} | grep "Welcome"
             then
