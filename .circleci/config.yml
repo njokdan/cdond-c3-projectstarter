@@ -517,8 +517,8 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --query "Reservations[*].Instances[*].PublicIpAddress" \
               --output text)
-            # Fetch and prepare the BACKEND_IP env var
-            export API_URL=http://${BACKEND_IP}:3030
+            # Fetch and prepare the BACKEND_PUBLIC_IP env var
+            export API_URL=http://${BACKEND_PUBLIC_IP}:3030
             echo ${BACKEND_PUBLIC_IP}
             echo backend-${CIRCLE_WORKFLOW_ID:0:7}
             echo ${API_URL}
