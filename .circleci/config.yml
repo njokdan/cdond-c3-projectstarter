@@ -542,8 +542,8 @@ jobs:
               exit 1
             fi
       # Here's where you will add some code to rollback on failure  
-      - destroy-environment
-      - revert-migrations
+      # - destroy-environment
+      # - revert-migrations
 
   cloudfront-update:
     docker:
@@ -572,8 +572,8 @@ jobs:
             --stack-name InitialStack \
             --tags project=udapeople
       # Here's where you will add some code to rollback on failure  
-      - destroy-environment
-      - revert-migrations
+      # - destroy-environment
+      # - revert-migrations
 
 # cleanup:
 #     docker:
