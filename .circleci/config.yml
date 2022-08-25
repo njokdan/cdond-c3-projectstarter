@@ -166,6 +166,7 @@ jobs:                       #Jobs
               --tags project=cfcife \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+            sleep 30  
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -177,6 +178,7 @@ jobs:                       #Jobs
       - run:
           name: Add back-end ip to ansible inventory
           command: |
+            sleep 30
             echo $(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
@@ -206,6 +208,7 @@ jobs:                       #Jobs
       - run:
           name: Configure server
           command: |
+            sleep 30
             # add environment variables to server
             # echo NODE_ENV=production > ~/project/backend/.env
             echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ~/project/backend/.env
@@ -342,10 +345,12 @@ jobs:                       #Jobs
       - run:
           name: Get backend url
           command: |
+            sleep 30
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
             --output text)
+            sleep 30
             export API_URL="http://${BACKEND_IP}:3030"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
@@ -408,16 +413,19 @@ jobs:                       #Jobs
           name: Install dependencies
           command: |
             apk add --update --no-cache curl aws-cli nodejs npm tar gzip
+            sleep 30
       - run:
           name: Backend smoke test
           command: |
+            sleep 30
             export BACKEND_IP=$(aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
             --output text)
+            sleep 30
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl "${API_URL}/api/status" | grep "ok"
+            if curl --retry 10 --retry-delay 5 "${API_URL}/api/status" | grep "ok"
             then
               exit 0
             else
