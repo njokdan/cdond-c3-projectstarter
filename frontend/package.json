@@ -67,6 +67,8 @@
     "webpack-cli": "^3.3.5",
     "webpack-dev-server": "^3.7.2"
   },
+
+
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.19",
     "@fortawesome/free-regular-svg-icons": "^5.9.0",

@@ -1,0 +1,18 @@
+URL DETAILS FOR PROJECT
+
+
+URL to public GitHub repository [URL01]
+
+https://github.com/Simon-Ejilogo/cdond-c3-projectstarter
+
+
+
+Public URL for your S3 Bucket [URL02]
+
+https://udapeople-a32c3e6.s3.amazonaws.com/index.html
+
+
+
+Cloudfront Domain
+
+d9rsaj0e3gi1.cloudfront.ne
