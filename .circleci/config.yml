@@ -374,7 +374,6 @@ jobs:
             export BACKEND=$(echo $BACKEND_IP | grep -o '[^ ]*$')
             
             echo $BACKEND
-            echo $BACKEND
             export API_URL="http://${BACKEND}:3030"
             echo "API_URL=${API_URL}"
 
